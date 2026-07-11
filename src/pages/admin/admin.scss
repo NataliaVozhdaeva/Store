@@ -1,0 +1,181 @@
+.admin {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+  font-family: 'Open Sans', sans-serif;
+  color: #274c5b;
+}
+
+.admin-title {
+  margin: 0 0 1.5rem;
+  font-family: 'Roboto', sans-serif;
+  font-size: 2rem;
+  text-align: center;
+  color: #274c5b;
+}
+
+.admin-subtitle {
+  margin: 0 0 1rem;
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.25rem;
+  color: #274c5b;
+}
+
+.admin-status {
+  text-align: center;
+  color: #525c60;
+}
+
+.admin-add {
+  margin-bottom: 2.5rem;
+  padding: 1.75rem;
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(39, 76, 91, 0.12);
+}
+
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  max-width: 560px;
+}
+
+.admin-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #525c60;
+}
+
+.admin-form input,
+.admin-form select,
+.admin-form textarea {
+  padding: 0.6rem 0.8rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: #274c5b;
+  background-color: #eff6f1;
+  border: 1px solid #d4d4d4;
+  border-radius: 10px;
+  transition: 0.2s;
+}
+
+.admin-form input:focus,
+.admin-form select:focus,
+.admin-form textarea:focus {
+  outline: none;
+  background-color: #fff;
+  border-color: #7eb693;
+  box-shadow: 0 0 0 3px rgba(126, 182, 147, 0.3);
+}
+
+.admin-btn {
+  padding: 0.6rem 1.4rem;
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.admin-btn--primary {
+  align-self: flex-start;
+  margin-top: 0.5rem;
+  color: #274c5b;
+  background-color: #efd372;
+}
+
+.admin-btn--primary:hover {
+  background-color: #e8c74d;
+}
+
+.admin-list {
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 12px 40px rgba(39, 76, 91, 0.1);
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #eff6f1;
+  vertical-align: middle;
+}
+
+.admin-table thead th {
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.85rem;
+  color: #fff;
+  background-color: #274c5b;
+}
+
+.admin-table tbody tr:hover {
+  background-color: #f9f8f8;
+}
+
+.admin-thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 8px;
+  background-color: #eff6f1;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.admin-btn--edit {
+  color: #274c5b;
+  background-color: transparent;
+  border-color: #274c5b;
+}
+
+.admin-btn--edit:hover {
+  color: #fff;
+  background-color: #274c5b;
+}
+
+.admin-btn--delete {
+  color: #d62212;
+  background-color: transparent;
+  border-color: #d62212;
+}
+
+.admin-btn--delete:hover {
+  color: #fff;
+  background-color: #d62212;
+}
+
+.admin-edit-modal .admin-form--modal {
+  max-width: none;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+@media only screen and (max-width: 600px) {
+  .admin-title {
+    font-size: 1.6rem;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.85rem;
+  }
+}

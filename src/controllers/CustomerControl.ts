@@ -93,6 +93,7 @@ export class Customer {
     try {
       const { body: customer } = await LoginCustomer(EMAIL, PASSWORD);
       localStorage.setItem('customerID', customer.id);
+      localStorage.setItem('isAdmin', String(Boolean(customer.isAdmin)));
       document.querySelector('.logged-item')?.classList.remove('hidden');
       document.querySelector('.nav-item_login')?.classList.add('hidden');
       document.querySelector('.nav-item_signup')?.classList.add('hidden');

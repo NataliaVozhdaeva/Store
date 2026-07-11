@@ -45,6 +45,7 @@ export default class HeaderView {
         const target = event.target as HTMLElement;
         if (target.classList.contains('logout')) {
           localStorage.removeItem('customerID');
+          localStorage.removeItem('isAdmin');
           localStorage.removeItem('access_token');
           localStorage.removeItem('cartID');
           this.container.innerHTML = '';

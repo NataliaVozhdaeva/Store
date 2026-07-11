@@ -11,6 +11,7 @@ import NotFoundView from './404/404';
 import CartView from './cart/cart';
 import State from '../services/state';
 import ProfileView from './profile/profile';
+import AdminView from './admin/admin';
 
 export default class Layout {
   private header: HeaderView;
@@ -25,6 +26,7 @@ export default class Layout {
   private notFound: NotFoundView;
   private cart: CartView;
   private profile: ProfileView;
+  private admin: AdminView;
 
   constructor() {
     this.header = new HeaderView();
@@ -37,6 +39,7 @@ export default class Layout {
     this.notFound = new NotFoundView();
     this.cart = new CartView();
     this.profile = new ProfileView();
+    this.admin = new AdminView();
     this.slot = document.createElement('main');
     this.handleRouteChange();
   }
@@ -75,6 +78,14 @@ export default class Layout {
           this.slot.innerHTML = '';
           break;
         }
+        case Router.pages.admin: {
+          pageHTML = '';
+          if (localStorage.getItem('isAdmin') !== 'true') {
+            Router.navigate(Router.pages.main);
+            pageHTML = this.main.render;
+          }
+          break;
+        }
         default: {
           if (route.includes('catalog/')) {
             pageHTML = '';
@@ -96,6 +107,12 @@ export default class Layout {
     } else if (route === Router.pages.profile) {
       this.slot.innerHTML = '';
       this.slot.append(this.profile.render());
+    } else if (
+      route === Router.pages.admin &&
+      localStorage.getItem('isAdmin') === 'true'
+    ) {
+      this.slot.innerHTML = '';
+      this.slot.append(this.admin.render());
     } else if (route.includes('catalog/')) {
       pageHTML = '';
       this.slot.append(this.catalog.render());

@@ -16,7 +16,8 @@ const INNER_HTML = {
     <li class="nav-item"><a href=${Router.pages.about} class="nav-link link">About</a></li>
     <li class="nav-item"><a href=${Router.pages.catalog} class="nav-link link">Catalog</a></li>`,
   loginItem: `<a href=${Router.pages.login} class="nav-link link">Log in</a>`,
-  signupItem: `<a href=${Router.pages.signup} class="nav-link link">Sign up</a>`
+  signupItem: `<a href=${Router.pages.signup} class="nav-link link">Sign up</a>`,
+  adminItem: `<a href=${Router.pages.admin} class="nav-link link">Admin</a>`
 };
 
 export default class MenuView {
@@ -50,6 +51,14 @@ export default class MenuView {
       signupListItem.classList.remove('hidden');
     }
     navList.append(loginListItem, signupListItem);
+
+    if (localStorage.getItem('isAdmin') === 'true') {
+      const adminListItem = document.createElement('li');
+      adminListItem.classList.add('nav-item', 'nav-item_admin');
+      adminListItem.innerHTML = `${INNER_HTML.adminItem}`;
+      navList.append(adminListItem);
+    }
+
     this.container.append(navList);
     return navList;
   }

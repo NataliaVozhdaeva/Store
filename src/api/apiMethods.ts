@@ -58,6 +58,35 @@ export function GetProductsPublished(): Promise<
   return api<ProductProjectionPagedQueryResponse>('/products');
 }
 
+// ---------- Управление товарами (админ-CMS) ----------
+
+export interface ProductInput {
+  name: string;
+  categoryId: string;
+  centAmount: number;
+  discountedCentAmount?: number | null;
+  description: string;
+  imageUrls?: string[];
+}
+
+export function CreateProduct(input: ProductInput): Promise<ClientResponse> {
+  return api('/products', { method: 'POST', body: JSON.stringify(input) });
+}
+
+export function UpdateProduct(
+  id: string,
+  input: ProductInput
+): Promise<ClientResponse> {
+  return api(`/products/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(input)
+  });
+}
+
+export function DeleteProduct(id: string): Promise<ClientResponse> {
+  return api(`/products/${id}`, { method: 'DELETE' });
+}
+
 export function getProductCategories(): Promise<
   ClientResponse<CategoryPagedQueryResponse>
 > {

@@ -7,7 +7,8 @@ export default abstract class Router {
     signup: '#signup',
     profile: '#profile',
     notFound: '#404',
-    cart: '#cart'
+    cart: '#cart',
+    admin: '#admin'
   };
 
   public static navigate(location: string): void {
