@@ -1,0 +1,163 @@
+.item-hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 450px;
+
+  background: url('../../assets/images/bgPat-itemHero.png'),
+    url('../../assets/images/bg-itemHero.png');
+}
+
+.item-content {
+  position: relative;
+  max-width: 1337px;
+  min-width: 0;
+  margin: 130px auto;
+  padding-right: 50px;
+
+  display: flex;
+  gap: 5rem;
+
+  border-radius: 30px;
+
+  background-color: #f9f8f8;
+}
+
+.item-description {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.item-category {
+  position: absolute;
+  top: 40px;
+  left: 40px;
+}
+
+.item-rating {
+  margin-bottom: 1rem;
+}
+
+.item-text {
+  margin-top: 30px;
+  margin-bottom: 30px;
+
+  color: #525c60;
+}
+
+.order-form {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.order-form > div {
+  height: 100%;
+}
+
+.order-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: #274c5b;
+}
+
+.order-quantity {
+  box-sizing: border-box;
+  height: 100%;
+  width: 135px;
+  padding: 10px;
+
+  text-align: center;
+  font-size: 1rem;
+  outline: none;
+  border: #274c5b solid 2px;
+  border-radius: 16px;
+}
+
+.img-container {
+  box-sizing: border-box;
+  width: 550px;
+  height: 550px;
+}
+
+.item-img {
+  width: 100%;
+  display: block;
+  height: 100%;
+  /* когда у контейнера height: auto (модалка, мобильные) — держим квадрат,
+     чтобы слайды не прыгали по высоте */
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+}
+
+.item-category--once {
+  z-index: 2;
+}
+
+@media only screen and (max-width: 1150px) {
+  .order-form {
+    flex-wrap: wrap;
+  }
+
+  .order-form > div {
+    height: auto;
+  }
+
+  .showModal.img-container {
+    left: calc(50% - 25vw);
+    width: 50vw;
+  }
+}
+
+@media only screen and (max-width: 950px) {
+  .item-content {
+    flex-wrap: wrap;
+    padding-right: 0;
+  }
+
+  .order-form > div {
+    height: 76px;
+  }
+
+  .item-description {
+    width: 550px;
+    margin: auto;
+  }
+
+  .item-hero {
+    height: 150px;
+    background-size: cover;
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  .img-container,
+  .item-description {
+    width: 85%;
+  }
+
+  .img-container {
+    height: auto;
+  }
+
+  .order-form {
+    justify-content: center;
+  }
+
+  .order-form > div {
+    height: auto;
+  }
+
+  .showModal + .item-description {
+    padding-left: 0;
+    height: auto;
+  }
+
+  .showModal.img-container {
+    left: calc(50% - 45vw);
+    width: 90vw;
+  }
+}

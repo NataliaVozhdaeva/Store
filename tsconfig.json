@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "target": "ES2017",
+    "module": "ES2022",
+    "sourceMap": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true
+  }
+}

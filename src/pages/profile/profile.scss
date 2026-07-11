@@ -1,0 +1,255 @@
+.profile {
+  background-color: $bg-dark;
+  position: relative;
+}
+
+.profile-title_wrapper {
+  position: relative;
+  text-align: center;
+}
+
+.profile-background-image {
+  position: relative;
+  width: 100%;
+  padding-top: 23.47%;
+  background:
+    url('../../assets/images/patterns_profile.png') no-repeat,
+    url('../../assets/images/banner_profile.png') no-repeat;
+  background-size: contain;
+  text-align: center;
+}
+
+.profile-title {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  padding: 0;
+}
+
+.profile-person,
+.address {
+  width: 600px;
+  margin: 0 auto;
+  margin-top: 3em;
+  padding: 1.5em;
+  background-color: #fafafa;
+  border-radius: 10px;
+}
+
+.profile-person *,
+.address-item * {
+  display: flex;
+  max-width: 550px;
+  padding: 0.25em;
+  padding-left: 1em;
+}
+
+.profile-info,
+.address-title {
+  width: 22em;
+  color: #274c5b;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.first-name-title,
+.last-name-title,
+.dob-title,
+.email-title,
+.address-street-title,
+.address-city-title,
+.address-state-title,
+.address-country-title,
+.address-post-title {
+  width: 8em;
+  color: #274c5b;
+  font-size: 22px;
+  vertical-align: middle;
+}
+
+.first-name-data,
+.last-name-data,
+.dob-data,
+.email-data,
+.address-street-data,
+.address-city-data,
+.address-state-data,
+.address-country-data,
+.address-post-data {
+  margin-left: 3em;
+  font-size: 22px;
+}
+
+.adr-billing *,
+.adr-shipping *,
+.adr-billing_deafult *,
+.adr-shipping_deafult * {
+  display: block;
+  border-radius: 4px;
+  margin-left: 4px;
+  padding: 4px 8px;
+  font-size: 14px;
+  background-color: #dcf2e3;
+  color: #274c5b;
+  align-self: center;
+}
+
+.info-edit-btn,
+.change-pass-btn,
+.address-edit-btn,
+.address-delete-btn {
+  width: 7.5em;
+  height: 2em;
+  margin-top: 1em;
+  margin-left: 1em;
+  padding: 1.75rem 1.75rem !important;
+}
+
+.change-pass-btn {
+  width: 8.5em;
+}
+
+dialog {
+  min-width: 350px;
+  border: 2px solid #274c5b;
+  border-radius: 10px;
+}
+
+.dialog-edit-info,
+.dialog-change-pass,
+.dialog-edit-address {
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog-edit-info input,
+.dialog-change-pass input,
+.dialog-edit-address input {
+  margin-bottom: 10px;
+}
+
+.dialog-checkbox-shipping,
+.dialog-checkbox-billing {
+  display: flex;
+}
+
+@media only screen and (max-width: 700px) {
+  .profile-title {
+    font-size: 2.2em;
+  }
+
+  .profile-person,
+  .address {
+    width: 360px;
+    margin-top: 2em;
+    padding: 1em;
+  }
+
+  .profile-person *,
+  .address-item * {
+    max-width: 330px;
+    padding: 0.25em;
+    padding-left: 1em;
+  }
+
+  .profile-info,
+  .address-title {
+    width: 14em;
+    font-size: 18px;
+  }
+
+  .first-name-title,
+  .last-name-title,
+  .dob-title,
+  .email-title,
+  .address-street-title,
+  .address-city-title,
+  .address-state-title,
+  .address-country-title,
+  .address-post-title {
+    width: 7em;
+    font-size: 18px;
+  }
+
+  .first-name-data,
+  .last-name-data,
+  .dob-data,
+  .email-data,
+  .address-street-data,
+  .address-city-data,
+  .address-state-data,
+  .address-country-data,
+  .address-post-data {
+    margin-left: 1em;
+    font-size: 18px;
+  }
+
+  .adr-billing *,
+  .adr-shipping *,
+  .adr-billing_deafult *,
+  .adr-shipping_deafult * {
+    display: block;
+    border-radius: 4px;
+    margin-left: 4px;
+    padding: 4px 8px;
+    font-size: 14px;
+    background-color: #dcf2e3;
+    color: #274c5b;
+  }
+}
+
+@media only screen and (max-width: 500px) {
+  .profile-person,
+  .address {
+    margin-top: 1em;
+    padding: 0.25em;
+  }
+
+  .profile-person *,
+  .address-item * {
+    padding: 0.15em;
+    padding-left: 0.5em;
+  }
+
+  .profile-info,
+  .address-title {
+    width: 13em;
+    font-size: 18px;
+  }
+
+  .first-name-title,
+  .last-name-title,
+  .dob-title,
+  .email-title,
+  .address-street-title,
+  .address-city-title,
+  .address-state-title,
+  .address-country-title,
+  .address-post-title {
+    font-size: 16px;
+  }
+
+  .first-name-data,
+  .last-name-data,
+  .dob-data,
+  .email-data,
+  .address-street-data,
+  .address-city-data,
+  .address-state-data,
+  .address-country-data,
+  .address-post-data {
+    margin-left: 0.1em;
+    font-size: 16px;
+  }
+
+  .adr-billing *,
+  .adr-shipping *,
+  .adr-billing_deafult *,
+  .adr-shipping_deafult * {
+    margin-left: 3px;
+    padding: 3px 6px;
+    font-size: 13px;
+  }
+}
