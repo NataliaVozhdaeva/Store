@@ -1,8 +1,6 @@
 # eCommerce-Application
 
-RS School group project by Half-mugles Team.
-
-This SPA replicates real-world shopping experiences in a digital environment convenience_store. It's a comprehensive online shopping portal that provides an interactive and seamless experience to users. From product discovery to checkout, the application ensures a smooth journey for the user, enhancing their engagement and boosting their purchasing confidence.
+A single-page e-commerce application that simulates a modern online shopping experience in a digital environment convenience_store. It's a comprehensive online shopping portal that provides an interactive and seamless experience to users. From product discovery to checkout, the application ensures a smooth journey for the user, enhancing their engagement and boosting their purchasing confidence.
 
 Users can browse through a range of products, view detailed descriptions, add their favorite items to the basket, and proceed to checkout. It includes features such as user registration and login, product search, product categorization, and sorting to make the shoppinggit branch experience more streamlined and convenient.
 
@@ -13,7 +11,7 @@ Application consist from:
 - Catalog Product page;
 - Detailed Product page;
 - User Profile page;
-- Basket page;
+- Cart page;
 - About Us page.
 
 SPA has a liquid layout and looks great on various devices with a minimum resolution of 390px.
@@ -36,12 +34,9 @@ SPA has a liquid layout and looks great on various devices with a minimum resolu
 ### Setup
 
 1. Clone this repo:
-   <code>git clone https://github.com/Ir4D/eCommerce-Application.git</code>
+   <code>git clone git@github.com:NataliaVozhdaeva/Store.git</code>
 
-2. Go to project folder:
-   <code>cd eCommerce-Application</code>
-
-3. Install dependencies:
+2. Install dependencies:
    <code>npm install</code>
 
 ### Scripts
