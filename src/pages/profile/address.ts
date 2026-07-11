@@ -72,6 +72,7 @@ export default class Address {
     this.container = document.createElement('div');
     this.container.className = 'address';
     this.errorModal = document.createElement('dialog');
+    this.errorModal.classList.add('app-modal', 'app-modal--error');
     this.container.append(this.errorModal);
     this.errorModal.addEventListener('click', () => {
       this.errorModal.close();
@@ -174,6 +175,7 @@ export default class Address {
 
   private setupEditModal(): void {
     this.editModal = document.createElement('dialog');
+    this.editModal.classList.add('app-modal');
     this.editModal.innerHTML = MODAL_CHANGE_ADDRESS;
     this.container.append(this.editModal);
 
@@ -231,8 +233,12 @@ export default class Address {
       )
         .then(({ body }) => {
           this.errorModal.innerText = 'Your data has been successfully changed';
+          // Успех — зелёное оформление вместо красного
+          this.errorModal.classList.remove('app-modal--error');
+          this.errorModal.classList.add('app-modal--success');
           this.errorModal.showModal();
-          window.location.reload();
+          // Даём прочитать сообщение об успехе, затем перезагружаем страницу
+          setTimeout(() => window.location.reload(), 3000);
         })
         .catch((error) => {
           this.errorModal.innerText =

@@ -54,6 +54,7 @@ export default class ProfileView extends Component {
     this.customerId = localStorage.getItem('customerID');
     this.container.classList.add('profile');
     this.errorModal = document.createElement('dialog');
+    this.errorModal.classList.add('app-modal', 'app-modal--error');
     this.renderHeading();
     this.refreshProfile();
     this.container.append(this.errorModal);
@@ -67,6 +68,7 @@ export default class ProfileView extends Component {
 
   private setupEditModal(): void {
     this.editModal = document.createElement('dialog');
+    this.editModal.classList.add('app-modal');
     this.editModal.innerHTML = MODAL_CHANGE_INFO;
     this.container.append(this.editModal);
 
@@ -126,6 +128,7 @@ export default class ProfileView extends Component {
 
   private setupChangePassModal(): void {
     this.changePassModal = document.createElement('dialog');
+    this.changePassModal.classList.add('app-modal');
     this.changePassModal.innerHTML = MODAL_CHANGE_PASS;
     this.container.append(this.changePassModal);
 
@@ -284,7 +287,12 @@ export default class ProfileView extends Component {
           ) as HTMLElement;
           addressesContainer.remove();
           this.errorModal.innerText = 'Your data has been successfully changed';
+          // Успех — зелёное оформление вместо красного
+          this.errorModal.classList.remove('app-modal--error');
+          this.errorModal.classList.add('app-modal--success');
           this.errorModal.showModal();
+          // Сообщение само закрывается через 3 секунды
+          setTimeout(() => this.errorModal.close(), 3000);
           this.refreshProfile();
         })
         .catch((error) => {
@@ -301,7 +309,12 @@ export default class ProfileView extends Component {
         .then(({ body }) => {
           this.errorModal.innerText =
             'Your password has been successfully changed';
+          // Успех — зелёное оформление вместо красного
+          this.errorModal.classList.remove('app-modal--error');
+          this.errorModal.classList.add('app-modal--success');
           this.errorModal.showModal();
+          // Сообщение само закрывается через 3 секунды
+          setTimeout(() => this.errorModal.close(), 3000);
         })
         .catch((error) => {
           console.error('Something went wrong:', error);
