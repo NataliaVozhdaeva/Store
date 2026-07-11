@@ -50,5 +50,13 @@ module.exports = {
     static: path.join(__dirname, "dist"),
     compress: true,
     port: 4000,
+    // Запросы фронтенда к /api проксируются на локальный ASP.NET-бэкенд (порт 5000).
+    // Благодаря этому код всегда обращается к относительному /api — и в деве, и в проде.
+    proxy: [
+      {
+        context: ["/api"],
+        target: "http://localhost:5000",
+      },
+    ],
   },
 };

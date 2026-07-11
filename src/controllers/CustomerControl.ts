@@ -1,7 +1,7 @@
-import { authenticate, createCustomerRecord } from '../api/mock/mockDb';
+import { LoginCustomer, RegisterCustomer } from '../api/apiMethods';
 
-// Демо-режим: регистрация и вход работают через локальный мок (localStorage),
-// внешние сервисы не используются. DOM-логика и события оставлены как были.
+// Регистрация и вход работают через реальный бэкенд (ASP.NET Core + EF Core).
+// DOM-логика и события оставлены как были.
 
 export class Customer {
   public createMsg(msg = ''): void {
@@ -38,30 +38,26 @@ export class Customer {
     SHIPPING_DEF: number | undefined
   ): Promise<void> {
     try {
-      const customer = createCustomerRecord({
+      const { body: customer } = await RegisterCustomer({
         email: EMAIL,
         password: PASSWORD,
         firstName: FIRST_NAME,
         lastName: LAST_NAME,
         dateOfBirth: DOB,
-        addresses: [
-          {
-            country: COUNTRY_BILL,
-            streetName: STREET_BILL,
-            postalCode: POST_BILL,
-            city: CITY_BILL
-          },
-          {
-            country: COUNTRY_SHIP,
-            streetName: STREET_SHIP,
-            postalCode: POST_SHIP,
-            city: CITY_SHIP
-          }
-        ],
-        billingAddresses: [0],
-        shippingAddresses: [1],
-        defaultBillingAddress: BILLING_DEF,
-        defaultShippingAddress: SHIPPING_DEF
+        billing: {
+          country: COUNTRY_BILL,
+          streetName: STREET_BILL,
+          postalCode: POST_BILL,
+          city: CITY_BILL
+        },
+        shipping: {
+          country: COUNTRY_SHIP,
+          streetName: STREET_SHIP,
+          postalCode: POST_SHIP,
+          city: CITY_SHIP
+        },
+        defaultBilling: BILLING_DEF !== undefined,
+        defaultShipping: SHIPPING_DEF !== undefined
       });
 
       localStorage.setItem('customerID', customer.id);
@@ -95,7 +91,7 @@ export class Customer {
 
   public async loginCustomer(EMAIL: string, PASSWORD: string): Promise<void> {
     try {
-      const customer = authenticate(EMAIL, PASSWORD);
+      const { body: customer } = await LoginCustomer(EMAIL, PASSWORD);
       localStorage.setItem('customerID', customer.id);
       document.querySelector('.logged-item')?.classList.remove('hidden');
       document.querySelector('.nav-item_login')?.classList.add('hidden');

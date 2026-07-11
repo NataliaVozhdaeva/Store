@@ -6,74 +6,69 @@ import type {
   DiscountCodeReference,
   ProductProjectionPagedQueryResponse
 } from '@commercetools/platform-sdk';
-import { CATEGORIES, PRODUCTS } from './mock/mockData';
-import {
-  authenticate,
-  createCart,
-  createCustomerRecord,
-  findCustomerByEmail,
-  getCart,
-  getCartByCustomer,
-  getCustomerById,
-  mutateCustomer,
-  resp,
-  seedDemoUsers,
-  updateCart,
-  uuid,
-  StoredCustomer
-} from './mock/mockDb';
 
-// Демо-режим: все функции сохраняют сигнатуры старого commercetools-слоя,
-// но работают с локальным моком (mock/mockDb.ts + mock/mockData.ts).
-// При переезде на реальный бэкенд (Azure) достаточно заменить
-// реализации в этом файле на fetch-запросы.
+// Реальный бэкенд (ASP.NET Core + EF Core). Все функции сохранили прежние
+// сигнатуры мок-слоя, но теперь ходят по HTTP в /api. Формат ответа
+// { body, statusCode } совпадает с ClientResponse SDK, поэтому страницы не менялись.
+// Параметр VERSION больше не нужен (версию ведёт сервер) — он игнорируется.
 
-seedDemoUsers();
+const API_BASE = '/api';
+
+// Генерация id (оставлена для совместимости со старым мок-слоем)
+export function uuid(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return `id-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+// Базовый вызов API: оборачивает fetch в формат ClientResponse SDK.
+// При не-2xx бросает Error с текстом от сервера — страницы уже ловят reject.
+async function api<T = unknown>(
+  path: string,
+  init?: RequestInit
+): Promise<ClientResponse<T>> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    headers: { 'Content-Type': 'application/json' },
+    ...init
+  });
+  if (!res.ok) {
+    let message = res.statusText;
+    try {
+      message = (await res.text()) || message;
+    } catch {
+      /* тело ошибки может быть пустым */
+    }
+    throw new Error(message);
+  }
+  const body = res.status === 204 ? undefined : await res.json();
+  return { body, statusCode: res.status } as ClientResponse<T>;
+}
 
 // Раньше выводила данные проекта commercetools; оставлена для совместимости
 export async function GetProjectInfo(): Promise<void> {
-  console.log('Demo mode: local mock backend, no remote project');
+  console.log('Backend mode: ASP.NET Core + EF Core');
 }
 
-// Каталог товаров (статические фикстуры)
+// ---------- Каталог ----------
+
 export function GetProductsPublished(): Promise<
   ClientResponse<ProductProjectionPagedQueryResponse>
 > {
-  return Promise.resolve(
-    resp({
-      limit: 30,
-      offset: 0,
-      count: PRODUCTS.length,
-      total: PRODUCTS.length,
-      results: PRODUCTS
-    })
-  );
+  return api<ProductProjectionPagedQueryResponse>('/products');
 }
 
 export function getProductCategories(): Promise<
   ClientResponse<CategoryPagedQueryResponse>
 > {
-  return Promise.resolve(
-    resp({
-      limit: 20,
-      offset: 0,
-      count: CATEGORIES.length,
-      total: CATEGORIES.length,
-      results: CATEGORIES
-    })
-  );
+  return api<CategoryPagedQueryResponse>('/categories');
 }
 
 // ---------- Чтение корзин ----------
-// Разделение «customer/anonim» осталось от commercetools:
-// в моке обе ветки работают с одним хранилищем
+// Деление на customer/anonim осталось от commercetools: обе ветки работают одинаково
 
 export function GetCart(CART_ID: string): Promise<ClientResponse> {
-  try {
-    return Promise.resolve(resp(getCart(CART_ID)));
-  } catch (error) {
-    return Promise.reject(error);
-  }
+  return api(`/carts/${CART_ID}`);
 }
 
 export function GetCartByID(CART_ID: string): Promise<ClientResponse> {
@@ -81,28 +76,20 @@ export function GetCartByID(CART_ID: string): Promise<ClientResponse> {
 }
 
 export function GetActiveCart(): Promise<ClientResponse> {
-  try {
-    const customerId = localStorage.getItem('customerID');
-    if (!customerId) throw new Error('No logged in customer');
-    return Promise.resolve(resp(getCartByCustomer(customerId)));
-  } catch (error) {
-    return Promise.reject(error);
+  const customerId = localStorage.getItem('customerID');
+  if (!customerId) {
+    return Promise.reject(new Error('No logged in customer'));
   }
+  return api(`/carts/by-customer/${customerId}`);
 }
 
 export function GetCartByCustomerId(
-  CISTOMER_ID: string
+  CUSTOMER_ID: string
 ): Promise<ClientResponse> {
-  try {
-    return Promise.resolve(resp(getCartByCustomer(CISTOMER_ID)));
-  } catch (error) {
-    return Promise.reject(error);
-  }
+  return api(`/carts/by-customer/${CUSTOMER_ID}`);
 }
 
-export async function GetAnonimCartByID(
-  CART_ID: string
-): Promise<ClientResponse> {
+export function GetAnonimCartByID(CART_ID: string): Promise<ClientResponse> {
   return GetCart(CART_ID);
 }
 
@@ -112,17 +99,10 @@ export function GetCartFromAnonim(
   CART_ID: string,
   VERSION: number
 ): Promise<ClientResponse> {
-  try {
-    return Promise.resolve(
-      resp(
-        updateCart(CART_ID, [
-          { action: 'setCustomerId', customerId: CUSTOMER_ID }
-        ])
-      )
-    );
-  } catch (error) {
-    return Promise.reject(error);
-  }
+  return api(`/carts/${CART_ID}/customer`, {
+    method: 'PUT',
+    body: JSON.stringify({ customerId: CUSTOMER_ID })
+  });
 }
 
 // ---------- Создание корзин ----------
@@ -130,87 +110,83 @@ export function GetCartFromAnonim(
 export function CreateCartAnonim(
   CURRENCY: string
 ): Promise<ClientResponse<Cart>> {
-  return Promise.resolve(resp(createCart()));
+  return api<Cart>('/carts', { method: 'POST', body: JSON.stringify({}) });
 }
 
 export function CreateCartCustomer(
   CURRENCY: string
 ): Promise<ClientResponse<Cart>> {
-  const customerId = localStorage.getItem('customerID') || undefined;
-  return Promise.resolve(resp(createCart(customerId)));
+  const customerId = localStorage.getItem('customerID') || null;
+  return api<Cart>('/carts', {
+    method: 'POST',
+    body: JSON.stringify({ customerId })
+  });
 }
 
 // ---------- Изменение корзин ----------
+// Во всех remove/update операциях приходит id позиции корзины (lineItem.id)
 
-function removeLineItems(
+function removeLineItem(
   CART_ID: string,
-  productIds: string[]
+  lineItemId: string
 ): Promise<ClientResponse<Cart>> {
-  try {
-    return Promise.resolve(
-      resp(
-        updateCart(
-          CART_ID,
-          productIds.map((id) => {
-            return { action: 'removeLineItem' as const, lineItemId: id };
-          })
-        )
-      )
-    );
-  } catch (error) {
-    return Promise.reject(error);
+  return api<Cart>(`/carts/${CART_ID}/line-items/${lineItemId}`, {
+    method: 'DELETE'
+  });
+}
+
+async function removeSeveral(
+  CART_ID: string,
+  lineItemIds: string[]
+): Promise<ClientResponse<Cart>> {
+  let last: ClientResponse<Cart> | undefined;
+  for (const id of lineItemIds) {
+    last = await removeLineItem(CART_ID, id);
   }
+  return last ?? (await api<Cart>(`/carts/${CART_ID}`));
 }
 
 export function RemoveFromCart(
   CART_ID: string,
   VERSION: number,
-  productId: string
+  lineItemId: string
 ): Promise<ClientResponse<Cart>> {
-  return removeLineItems(CART_ID, [productId]);
+  return removeLineItem(CART_ID, lineItemId);
 }
 
 export function RemoveFromAnonimCart(
   CART_ID: string,
   VERSION: number,
-  productId: string
+  lineItemId: string
 ): Promise<ClientResponse<Cart>> {
-  return removeLineItems(CART_ID, [productId]);
+  return removeLineItem(CART_ID, lineItemId);
 }
 
 export function RemoveSeveralFromCart(
   CART_ID: string,
   VERSION: number,
-  productIds: string[]
+  lineItemIds: string[]
 ): Promise<ClientResponse<Cart>> {
-  return removeLineItems(CART_ID, productIds);
+  return removeSeveral(CART_ID, lineItemIds);
 }
 
 export function RemoveSeveralFromAnonimCart(
   CART_ID: string,
   VERSION: number,
-  productIds: string[]
+  lineItemIds: string[]
 ): Promise<ClientResponse<Cart>> {
-  return removeLineItems(CART_ID, productIds);
+  return removeSeveral(CART_ID, lineItemIds);
 }
 
 function addLineItem(
   CART_ID: string,
   productId: string,
-  variantId: number,
   quantity: number
 ): Promise<ClientResponse<Cart>> {
-  try {
-    return Promise.resolve(
-      resp(
-        updateCart(CART_ID, [
-          { action: 'addLineItem', productId, variantId, quantity }
-        ])
-      )
-    );
-  } catch (error) {
-    return Promise.reject(error);
-  }
+  return api<Cart>(`/carts/${CART_ID}/line-items`, {
+    method: 'POST',
+    body: JSON.stringify({ productId, quantity })
+  });
 }
 
 export function addToCart(
@@ -220,7 +196,7 @@ export function addToCart(
   variantId: number,
   quantity: number
 ): Promise<ClientResponse<Cart>> {
-  return addLineItem(CART_ID, productId, variantId, quantity);
+  return addLineItem(CART_ID, productId, quantity);
 }
 
 export function addToAnonimCart(
@@ -230,7 +206,7 @@ export function addToAnonimCart(
   variantId: number,
   quantity: number
 ): Promise<ClientResponse<Cart>> {
-  return addLineItem(CART_ID, productId, variantId, quantity);
+  return addLineItem(CART_ID, productId, quantity);
 }
 
 function changeQuantity(
@@ -238,21 +214,10 @@ function changeQuantity(
   LINE_ITEM_ID: string,
   QUANTITY: number
 ): Promise<ClientResponse<Cart>> {
-  try {
-    return Promise.resolve(
-      resp(
-        updateCart(CART_ID, [
-          {
-            action: 'changeLineItemQuantity',
-            lineItemId: LINE_ITEM_ID,
-            quantity: QUANTITY
-          }
-        ])
-      )
-    );
-  } catch (error) {
-    return Promise.reject(error);
-  }
+  return api<Cart>(`/carts/${CART_ID}/line-items/${LINE_ITEM_ID}`, {
+    method: 'PUT',
+    body: JSON.stringify({ quantity: QUANTITY })
+  });
 }
 
 export function UpdateCartProdQuantity(
@@ -291,14 +256,10 @@ function applyDiscount(
   CART_ID: string,
   DISCOUNT_CODE: string
 ): Promise<ClientResponse<Cart>> {
-  try {
-    return Promise.resolve(
-      resp(updateCart(CART_ID, [{ action: 'addDiscountCode', code: DISCOUNT_CODE }]))
-    );
-  } catch (error) {
-    // Неверный код: корзина покажет «Enter a valid discount code»
-    return Promise.reject(error);
-  }
+  return api<Cart>(`/carts/${CART_ID}/discount`, {
+    method: 'POST',
+    body: JSON.stringify({ code: DISCOUNT_CODE })
+  });
 }
 
 export function SetDiscount(
@@ -322,49 +283,73 @@ export function RemoveFirstVisitCode(
   VERSION: number,
   DISCOUNT_CODE: DiscountCodeReference
 ): Promise<ClientResponse<Cart>> {
-  try {
-    return Promise.resolve(
-      resp(
-        updateCart(CART_ID, [
-          { action: 'removeDiscountCode', discountCode: DISCOUNT_CODE }
-        ])
-      )
-    );
-  } catch (error) {
-    return Promise.reject(error);
-  }
+  return api<Cart>(`/carts/${CART_ID}/discount`, { method: 'DELETE' });
 }
 
 // ---------- Покупатели ----------
 
+// Регистрация нового покупателя (используется CustomerControl)
+export interface RegisterPayload {
+  email: string;
+  password: string;
+  firstName?: string;
+  lastName?: string;
+  dateOfBirth?: string;
+  billing?: {
+    country: string;
+    streetName?: string;
+    postalCode?: string;
+    city?: string;
+  };
+  shipping?: {
+    country: string;
+    streetName?: string;
+    postalCode?: string;
+    city?: string;
+  };
+  defaultBilling?: boolean;
+  defaultShipping?: boolean;
+  isAdmin?: boolean;
+}
+
+export function RegisterCustomer(
+  payload: RegisterPayload
+): Promise<ClientResponse> {
+  return api('/customers/register', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+}
+
+export function LoginCustomer(
+  EMAIL: string,
+  PASSWORD: string
+): Promise<ClientResponse> {
+  return api('/customers/login', {
+    method: 'POST',
+    body: JSON.stringify({ email: EMAIL, password: PASSWORD })
+  });
+}
+
 export function CreateCustomer(EMAIL: string, PASSWORD: string): void {
-  try {
-    const customer = createCustomerRecord({ email: EMAIL, password: PASSWORD });
-    console.log(customer.email);
-  } catch (error) {
-    console.error(error);
-  }
+  RegisterCustomer({ email: EMAIL, password: PASSWORD })
+    .then((customer) => console.log(customer.body.email))
+    .catch((error) => console.error(error));
 }
 
 // Данные текущего покупателя (по customerID из localStorage)
 export function QueryCustomer(): Promise<ClientResponse> {
-  try {
-    const customerId = localStorage.getItem('customerID');
-    if (!customerId) throw new Error('No logged in customer');
-    return Promise.resolve(resp(getCustomerById(customerId)));
-  } catch (error) {
-    return Promise.reject(error);
+  const customerId = localStorage.getItem('customerID');
+  if (!customerId) {
+    return Promise.reject(new Error('No logged in customer'));
   }
+  return api(`/customers/${customerId}`);
 }
 
 export function QueryCustomerById(
   CUSTOMER_ID: string
 ): Promise<ClientResponse> {
-  try {
-    return Promise.resolve(resp(getCustomerById(CUSTOMER_ID)));
-  } catch (error) {
-    return Promise.reject(error);
-  }
+  return api(`/customers/${CUSTOMER_ID}`);
 }
 
 export function EditCustomerById(
@@ -375,23 +360,15 @@ export function EditCustomerById(
   EMAIL: string,
   VERSION: number
 ): Promise<ClientResponse> {
-  try {
-    const updated = mutateCustomer(CUSTOMER_ID, (record) => {
-      const editable = record as {
-        firstName?: string;
-        lastName?: string;
-        dateOfBirth?: string;
-        email: string;
-      };
-      editable.firstName = FISRT_NAME;
-      editable.lastName = LAST_NAME;
-      editable.dateOfBirth = DATE_OF_BIRTH;
-      editable.email = EMAIL;
-    });
-    return Promise.resolve(resp(updated));
-  } catch (error) {
-    return Promise.reject(error);
-  }
+  return api(`/customers/${CUSTOMER_ID}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      firstName: FISRT_NAME,
+      lastName: LAST_NAME,
+      dateOfBirth: DATE_OF_BIRTH,
+      email: EMAIL
+    })
+  });
 }
 
 export function ChangePassword(
@@ -400,18 +377,10 @@ export function ChangePassword(
   PASS_NEW: string,
   VERSION: number
 ): Promise<ClientResponse> {
-  try {
-    const updated = mutateCustomer(CUSTOMER_ID, (record) => {
-      if (record.password !== PASS_OLD) {
-        throw new Error('The given current password does not match');
-      }
-      const editable = record as StoredCustomer;
-      editable.password = PASS_NEW;
-    });
-    return Promise.resolve(resp(updated));
-  } catch (error) {
-    return Promise.reject(error);
-  }
+  return api(`/customers/${CUSTOMER_ID}/password`, {
+    method: 'PUT',
+    body: JSON.stringify({ oldPassword: PASS_OLD, newPassword: PASS_NEW })
+  });
 }
 
 export function EditAddressById(
@@ -424,29 +393,16 @@ export function EditAddressById(
   POSTAL_CODE: string,
   VERSION: number
 ): Promise<ClientResponse> {
-  try {
-    const updated = mutateCustomer(CUSTOMER_ID, (record) => {
-      const address = record.addresses.find(
-        (candidate) => candidate.id === ADDRESS_ID
-      );
-      if (!address) throw new Error(`Address ${ADDRESS_ID} not found`);
-      const editable = address as {
-        streetName?: string;
-        city?: string;
-        state?: string;
-        country: string;
-        postalCode?: string;
-      };
-      editable.streetName = STREET_NAME;
-      editable.city = CITY;
-      editable.state = STATE;
-      editable.country = COUNTRY;
-      editable.postalCode = POSTAL_CODE;
-    });
-    return Promise.resolve(resp(updated));
-  } catch (error) {
-    return Promise.reject(error);
-  }
+  return api(`/customers/${CUSTOMER_ID}/addresses/${ADDRESS_ID}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      streetName: STREET_NAME,
+      city: CITY,
+      state: STATE,
+      country: COUNTRY,
+      postalCode: POSTAL_CODE
+    })
+  });
 }
 
 export function SetDefaultShipAdr(
@@ -455,15 +411,10 @@ export function SetDefaultShipAdr(
   DEF_SHIPPING: boolean,
   VERSION: number
 ): Promise<ClientResponse> {
-  try {
-    const updated = mutateCustomer(CUSTOMER_ID, (record) => {
-      const editable = record as { defaultShippingAddressId?: string };
-      editable.defaultShippingAddressId = DEF_SHIPPING ? ADDRESS_ID : undefined;
-    });
-    return Promise.resolve(resp(updated));
-  } catch (error) {
-    return Promise.reject(error);
-  }
+  return api(`/customers/${CUSTOMER_ID}/default-shipping`, {
+    method: 'PUT',
+    body: JSON.stringify({ addressId: ADDRESS_ID, value: DEF_SHIPPING })
+  });
 }
 
 export function SetDefaultBillAdr(
@@ -472,35 +423,23 @@ export function SetDefaultBillAdr(
   DEF_BILLING: boolean,
   VERSION: number
 ): Promise<ClientResponse> {
-  try {
-    const updated = mutateCustomer(CUSTOMER_ID, (record) => {
-      const editable = record as { defaultBillingAddressId?: string };
-      editable.defaultBillingAddressId = DEF_BILLING ? ADDRESS_ID : undefined;
-    });
-    return Promise.resolve(resp(updated));
-  } catch (error) {
-    return Promise.reject(error);
-  }
+  return api(`/customers/${CUSTOMER_ID}/default-billing`, {
+    method: 'PUT',
+    body: JSON.stringify({ addressId: ADDRESS_ID, value: DEF_BILLING })
+  });
 }
 
 export function QueryCustomerByEmail(EMAIL: string): void {
-  const customer = findCustomerByEmail(EMAIL);
-  if (!customer) {
-    console.log('This email address has not been registered.');
-  } else {
-    console.log(customer.id);
-  }
+  api<{ id: string }>(`/customers/by-email/${encodeURIComponent(EMAIL)}`)
+    .then((customer) => console.log(customer.body.id))
+    .catch(() => console.log('This email address has not been registered.'));
 }
 
 export function AuthenticateCustomer(EMAIL: string, PASSWORD: string): void {
-  try {
-    const customer = authenticate(EMAIL, PASSWORD);
-    console.log(customer.id);
-    console.log(customer.email);
-  } catch (error) {
-    console.error(error);
-  }
+  LoginCustomer(EMAIL, PASSWORD)
+    .then((customer) => {
+      console.log(customer.body.id);
+      console.log(customer.body.email);
+    })
+    .catch((error) => console.error(error));
 }
-
-// Экспорт для будущего бэкенда: генерация ID в одном месте
-export { uuid };
