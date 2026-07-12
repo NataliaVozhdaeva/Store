@@ -50,7 +50,8 @@ function isValidCountry(inputCountry: string): boolean {
 function isValidPostalCodeBill(code: string): boolean {
   const country = (document.querySelector('.country_bill') as HTMLInputElement)
     ?.value;
-  const countryData = countries.find((item) => item.name === country);
+  const input = country?.trim().toUpperCase();
+  const countryData = countries.find((item) => item.name === input);
   if (countryData && countryData.postalCode.test(code)) {
     return true;
   }
@@ -60,7 +61,8 @@ function isValidPostalCodeBill(code: string): boolean {
 function isValidPostalCodeShip(code: string): boolean {
   const country = (document.querySelector('.country_ship') as HTMLInputElement)
     ?.value;
-  const countryData = countries.find((item) => item.name === country);
+  const input = country?.trim().toUpperCase();
+  const countryData = countries.find((item) => item.name === input);
   if (countryData && countryData.postalCode.test(code)) {
     return true;
   }

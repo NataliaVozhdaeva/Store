@@ -8,5 +8,10 @@ export const countries = [
     name: 'GERMANY',
     alpha2Code: 'DE',
     postalCode: /^\d{4}$/
+  },
+  {
+    name: 'NEW ZEALAND',
+    alpha2Code: 'NZ',
+    postalCode: /^\d{4}$/
   }
 ];

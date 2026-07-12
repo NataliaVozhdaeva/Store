@@ -37,6 +37,7 @@ const formNameDob = `
 export const countriesList = `
   <option value='BELARUS'>BELARUS</option>
   <option value='GERMANY'>GERMANY</option>
+  <option value='NEW ZEALAND'>NEW ZEALAND</option>
 `;
 
 const formBillingAddress = `
