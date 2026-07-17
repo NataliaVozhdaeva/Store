@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Server.Data;
@@ -6,19 +7,51 @@ using Server.Models;
 
 namespace Server.Controllers;
 
-public record AddressInput(string Country, string? StreetName, string? PostalCode, string? City, string? State);
+public record AddressInput(
+    [Required(ErrorMessage = "Country is required")] string Country,
+    [Required(ErrorMessage = "Street is required")]
+    [RegularExpression("^[a-zA-Z ]+$", ErrorMessage = "Street must contain only Latin letters")]
+    string? StreetName,
+    [Required(ErrorMessage = "Postal code is required")] string? PostalCode,
+    [Required(ErrorMessage = "City is required")] string? City,
+    string? State);
+
 public record RegisterInput(
+    [Required(ErrorMessage = "Email is required")]
+    [EmailAddress(ErrorMessage = "Email must be a properly formatted address")]
     string Email,
+    [Required(ErrorMessage = "Password is required")]
+    [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=\S+$).{8,}$",
+        ErrorMessage = "Password must contain at least 8 characters, one uppercase letter, one lowercase letter and one digit, no whitespace")]
     string Password,
+    [Required(ErrorMessage = "First name is required")]
+    [RegularExpression("^[a-zA-Z ]+$", ErrorMessage = "First name must contain only Latin letters")]
     string? FirstName,
+    [Required(ErrorMessage = "Last name is required")]
+    [RegularExpression("^[a-zA-Z ]+$", ErrorMessage = "Last name must contain only Latin letters")]
     string? LastName,
-    string? DateOfBirth,
+    [Required(ErrorMessage = "Date of birth is required")] string? DateOfBirth,
     AddressInput? Billing,
     AddressInput? Shipping,
     bool DefaultBilling,
     bool DefaultShipping,
-    bool? IsAdmin);
-public record LoginInput(string Email, string Password);
+    bool? IsAdmin) : IValidatableObject
+{
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (DateOfBirth is not null &&
+            DateTime.TryParse(DateOfBirth, out var dob) &&
+            dob > DateTime.UtcNow.AddYears(-13))
+        {
+            yield return new ValidationResult(
+                "Customer must be at least 13 years old",
+                new[] { nameof(DateOfBirth) });
+        }
+    }
+}
+public record LoginInput(
+    [Required(ErrorMessage = "Email is required")] string Email,
+    [Required(ErrorMessage = "Password is required")] string Password);
 public record ProfileInput(string? FirstName, string? LastName, string? DateOfBirth, string Email);
 public record PasswordInput(string OldPassword, string NewPassword);
 public record EditAddressInput(string? StreetName, string? City, string? State, string Country, string? PostalCode);

@@ -8,7 +8,7 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<AppDbConte
     public AppDbContext CreateDbContext(string[] args)
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseSqlServer("Server=localhost;Database=OrganickDb;Trusted_Connection=True;")
+            .UseSqlServer("Server=localhost;Database=OrganicDb;Trusted_Connection=True;")
             .Options;
 
         return new AppDbContext(options);
