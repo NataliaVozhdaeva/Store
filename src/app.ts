@@ -40,7 +40,8 @@ export default class App {
     window.addEventListener('user-registration-fail', (event) => {
       this.signUpModal.show({
         status: (<CustomEvent>event).detail.status,
-        email: (<CustomEvent>event).detail.email
+        email: (<CustomEvent>event).detail.email,
+        message: (<CustomEvent>event).detail.message
       });
     });
   }

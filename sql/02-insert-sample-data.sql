@@ -1,4 +1,4 @@
-/* Organick eCommerce - sample data for Azure SQL Database (T-SQL) */
+/* Organic eCommerce - sample data for Azure SQL Database (T-SQL) */
 /* Run AFTER 01-create-database.sql. Safe to re-run: skips if data already present. */
 
 SET NOCOUNT ON;

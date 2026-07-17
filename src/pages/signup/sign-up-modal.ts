@@ -1,16 +1,23 @@
 /* eslint-disable max-lines-per-function */
 import Router from '../../services/router/router';
 
-type ModalStatusType = 'success' | 'user exists' | 'form error';
+type ModalStatusType = 'success' | 'user exists' | 'form error' | 'error';
 type ModalArgsType = {
   status: ModalStatusType;
   firstName?: string;
   lastName?: string;
   email?: string;
+  message?: string;
 };
 
 export default class SignUpModal {
-  public show({ status, firstName, lastName, email }: ModalArgsType): void {
+  public show({
+    status,
+    firstName,
+    lastName,
+    email,
+    message
+  }: ModalArgsType): void {
     const container = document.querySelector(
       '.sign-up-modal'
     ) as HTMLDialogElement;
@@ -30,12 +37,25 @@ export default class SignUpModal {
                                     `;
         break;
       }
-
-      default: {
+      case 'error': {
+        container.innerHTML = `
+                                    <div class="modal-fail-img"></div>
+                                    <h3 class="modal-message">Sorry. <br> ${message ?? 'Something went wrong. Please try again.'}</h3>
+                                    `;
+        break;
+      }
+      case 'success': {
         container.innerHTML = `
                                   <div class="modal-succes-img"></div>
                                   <h3 class="modal-message">User <br> ${firstName} ${lastName} <br> succesfully registered!</h3>
                                   `;
+        break;
+      }
+      default: {
+        container.innerHTML = `
+                                    <div class="modal-fail-img"></div>
+                                    <h3 class="modal-message">Sorry. <br> Something went wrong. Please try again.</h3>
+                                    `;
       }
     }
     container.showModal();

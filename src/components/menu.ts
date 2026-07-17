@@ -6,7 +6,7 @@ const INNER_HTML = {
     <li class="nav-item header-logo logo">
       <a href="#main">
         <img src="./images/Logo.png" alt="logo" class="logo-img" width="37" height="54"/>
-        <h4 class="logo-text">Organick</h4>
+        <h4 class="logo-text">Organic</h4>
       </a>
     </li>
     <li class="nav-item">

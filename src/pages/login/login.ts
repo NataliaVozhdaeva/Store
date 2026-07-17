@@ -3,11 +3,27 @@ import { Customer } from '../../controllers/CustomerControl';
 
 const createCodeTemplate = (): string => {
   const loginFunc = (): void => {
-    const email = (document.querySelector('#email') as HTMLInputElement)?.value;
-    const psw = (document.querySelector('#psw') as HTMLInputElement)?.value;
+    const emailInput = document.querySelector('#email') as HTMLInputElement;
+    const pswInput = document.querySelector('#psw') as HTMLInputElement;
+
+    // Логин не должен переиспользовать строгие regex-проверки формата/сложности
+    // из формы регистрации — у уже существующего аккаунта пароль мог быть
+    // задан раньше и не обязан им соответствовать. Проверяем только, что поля
+    // не пустые, остальное (верны ли email/пароль) решает сервер.
+    const emailEmpty = !emailInput?.value.trim();
+    const pswEmpty = !pswInput?.value.trim();
+
+    const emailError = emailInput?.nextElementSibling as HTMLElement | null;
+    const pswError = pswInput?.nextElementSibling as HTMLElement | null;
+    if (emailError) emailError.textContent = emailEmpty ? 'Email is required' : '';
+    if (pswError) pswError.textContent = pswEmpty ? 'Password is required' : '';
+    emailInput?.classList.toggle('error', emailEmpty);
+    pswInput?.classList.toggle('error', pswEmpty);
+
+    if (emailEmpty || pswEmpty) return;
 
     const customer = new Customer();
-    customer.loginCustomer(email, psw);
+    customer.loginCustomer(emailInput.value, pswInput.value);
   };
 
   document.addEventListener('click', (event: MouseEvent) => {

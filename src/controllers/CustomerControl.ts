@@ -3,6 +3,21 @@ import { LoginCustomer, RegisterCustomer } from '../api/apiMethods';
 // Регистрация и вход работают через реальный бэкенд (ASP.NET Core + EF Core).
 // DOM-логика и события оставлены как были.
 
+// Тело 400-ответа от ASP.NET ([ApiController] + data annotations) — это
+// ProblemDetails с полем errors: { FieldName: string[] }. Достаём из него
+// читаемый текст для модалки вместо сырого JSON.
+function extractErrorMessage(raw: string): string {
+  try {
+    const parsed = JSON.parse(raw) as { errors?: Record<string, string[]> };
+    if (parsed.errors) {
+      return Object.values(parsed.errors).flat().join(' ');
+    }
+  } catch {
+    /* ответ не JSON — используем текст как есть */
+  }
+  return raw;
+}
+
 export class Customer {
   public createMsg(msg = ''): void {
     document.querySelector<HTMLElement>('.msg')?.remove();
@@ -77,14 +92,16 @@ export class Customer {
       document.querySelector('.nav-item_signup')?.classList.add('hidden');
       window.location.hash = 'main';
       window.location.reload();
-    } catch {
-      // Такой e-mail уже зарегистрирован
-      const registerRejectEvent = new CustomEvent('user-registration-fail', {
-        detail: {
-          status: 'user exists',
-          email: EMAIL
-        }
-      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '';
+      const registerRejectEvent =
+        message.toLowerCase().includes('already exists')
+          ? new CustomEvent('user-registration-fail', {
+              detail: { status: 'user exists', email: EMAIL }
+            })
+          : new CustomEvent('user-registration-fail', {
+              detail: { status: 'error', message: extractErrorMessage(message) }
+            });
       window.dispatchEvent(registerRejectEvent);
     }
   }

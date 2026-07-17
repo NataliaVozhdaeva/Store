@@ -18,7 +18,10 @@ const createCodeTemplate = (): string => {
     if (targetClass) {
       validators[targetClass](target.value);
     }
-    if (target.classList.contains('country_bill')) {
+    // event.isTrusted: сбрасывать индекс нужно только когда страну меняет
+    // сам пользователь, а не когда мы на кнопке "Sign up" рассылаем
+    // синтетические input-события для принудительной ревалидации формы
+    if (target.classList.contains('country_bill') && event.isTrusted) {
       const postalCodeInput = document.querySelector(
         '.post_bill'
       ) as HTMLInputElement;
@@ -26,7 +29,7 @@ const createCodeTemplate = (): string => {
         postalCodeInput.value = '';
       }
     }
-    if (target.classList.contains('country_ship')) {
+    if (target.classList.contains('country_ship') && event.isTrusted) {
       const postalCodeInput = document.querySelector(
         '.post_ship'
       ) as HTMLInputElement;
@@ -40,27 +43,25 @@ const createCodeTemplate = (): string => {
     const target = event.target as HTMLElement;
     event.stopImmediatePropagation();
     if (target && target.classList.contains('form-button')) {
-      const inputElements = document.querySelectorAll('input');
-      const inputElemsCopiedAddr = document.querySelectorAll(
-        '.input-copy'
-      ) as NodeListOf<HTMLInputElement>;
-      let hasError = false;
-      let allInputsEmpty = true;
-      let isEmpty = false;
-      inputElements.forEach((input) => {
-        if (input.classList.contains('error')) {
-          hasError = true;
-        }
-        if (input.value !== '') {
-          allInputsEmpty = false;
-        }
-      });
-      inputElemsCopiedAddr.forEach((inputCopy) => {
-        if (inputCopy.value === '') {
-          isEmpty = true;
-        }
-      });
-      if (hasError || allInputsEmpty) {
+      // Ограничиваем проверку полями формы регистрации и принудительно
+      // валидируем даже те поля, в которые пользователь ни разу не вводил
+      // текст (иначе они остаются "чистыми" и форма уходит на сервер пустой)
+      const formContainer = document.querySelector('.form-container');
+      const inputElements = formContainer
+        ? Array.from(formContainer.querySelectorAll('input')).filter(
+            (input) => input.type !== 'checkbox' && !input.closest('.hidden')
+          )
+        : [];
+
+      inputElements.forEach((input) =>
+        input.dispatchEvent(new Event('input', { bubbles: true }))
+      );
+
+      const hasError = inputElements.some((input) =>
+        input.classList.contains('error')
+      );
+
+      if (hasError) {
         signUpModal.show({ status: 'form error' });
       } else {
         await signupCreate();

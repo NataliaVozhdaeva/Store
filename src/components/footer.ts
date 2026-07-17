@@ -19,7 +19,7 @@ export default class FooterView {
     </ul>
   </div>
   <div class="footer-info">
-    <div class="footer-logo logo"><img src="./images/Logo.png" alt="logo" class="logo-img" width="37" height="54"/><h4 class="logo-text">Organick</h4> </div>
+    <div class="footer-logo logo"><img src="./images/Logo.png" alt="logo" class="logo-img" width="37" height="54"/><h4 class="logo-text">Organic</h4> </div>
     <p class="footer-text">Simply dummy text of the printing and typesetting industry.</br>Lorem Ipsum simply dummy text of the printing </p>
     <ul class="info-list list">
       <li class="info-item"><a href="" class="info-link link"><img src="./images/icons/insta-icon.png" alt="insta" class="info-icon"></a></li>
