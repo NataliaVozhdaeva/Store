@@ -67,24 +67,8 @@ const createCodeTemplate = (): string => {
         await signupCreate();
       }
     }
-
-    const targetHideShow = event.target as HTMLElement;
-    if (
-      targetHideShow &&
-      targetHideShow.classList.contains('form-psw_toggle')
-    ) {
-      const passwordInput = document.querySelector(
-        '.form-psw_input'
-      ) as HTMLInputElement;
-      const type = passwordInput.getAttribute('type');
-      if (type === 'password') {
-        passwordInput.setAttribute('type', 'text');
-        targetHideShow.innerHTML = '&#9899;';
-      } else {
-        passwordInput.setAttribute('type', 'password');
-        targetHideShow.innerHTML = '&#9898;';
-      }
-    }
+    // Логика кнопки "показать пароль" вынесена в общий модуль
+    // components/password-toggle, чтобы работать и на login, и на signup.
   });
 
   document.addEventListener('change', (event) => {

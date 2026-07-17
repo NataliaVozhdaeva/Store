@@ -1,6 +1,7 @@
 import Layout from './pages/layout';
 import SignUpModal from './pages/signup/sign-up-modal';
 import State from './services/state';
+import { initPasswordToggle } from './components/password-toggle';
 
 export default class App {
   public appContainer = document.querySelector<HTMLElement>('body');
@@ -16,6 +17,9 @@ export default class App {
       () => {}
     );
     if (!this.appContainer) throw new Error('error');
+    // Регистрируем один раз, до рендера страниц: слушатель тогда сработает
+    // раньше обработчиков страницы (которые вызывают stopImmediatePropagation).
+    initPasswordToggle();
     this.layout.render(this.appContainer);
 
     this.menuIcon =
