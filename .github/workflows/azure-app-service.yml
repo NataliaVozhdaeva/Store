@@ -6,8 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: OrganicStore
-  # TODO: замените на реальное имя resource group в Azure (Portal -> App Service -> Overview -> Resource group)
+  AZURE_WEBAPP_NAME: NovaEdge-Organicstore
   AZURE_RESOURCE_GROUP: organicRG
 
 jobs:
