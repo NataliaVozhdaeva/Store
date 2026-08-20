@@ -1,4 +1,5 @@
 using Server.Models;
+using Server.Security;
 
 namespace Server.Data;
 
@@ -107,7 +108,7 @@ public static class SeedData
             {
                 Id = Guid.NewGuid().ToString(),
                 Email = email,
-                Password = pass,
+                Password = CryptoHelper.HashPassword(pass),
                 FirstName = first,
                 LastName = last,
                 DateOfBirth = dob,

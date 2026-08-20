@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Server.Data;
+using Server.Middleware;
+using Server.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +30,10 @@ builder.Services.AddCors(o => o.AddPolicy("app", p =>
     p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
 var app = builder.Build();
+
+// Register Security Headers & Security Audit Logging Middleware (Member 3 - Application Security)
+app.UseMiddleware<SecurityHeadersMiddleware>();
+app.UseMiddleware<AuditLoggingMiddleware>();
 
 // Создание/миграция схемы и посев стартовых данных при запуске
 using (var scope = app.Services.CreateScope())

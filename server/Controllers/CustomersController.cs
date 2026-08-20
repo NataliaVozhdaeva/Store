@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Server.Data;
 using Server.Dtos;
 using Server.Models;
+using Server.Security;
 
 namespace Server.Controllers;
 
@@ -85,7 +86,7 @@ public class CustomersController : ControllerBase
         {
             Id = Guid.NewGuid().ToString(),
             Email = input.Email,
-            Password = input.Password,
+            Password = CryptoHelper.HashPassword(input.Password),
             FirstName = input.FirstName,
             LastName = input.LastName,
             DateOfBirth = input.DateOfBirth,
@@ -106,8 +107,21 @@ public class CustomersController : ControllerBase
     public async Task<IActionResult> Login(LoginInput input)
     {
         var customer = await _db.Customers.Include(c => c.Addresses)
-            .FirstOrDefaultAsync(c => c.Email.ToLower() == input.Email.ToLower() && c.Password == input.Password);
-        return customer is null ? Unauthorized("Invalid credentials") : Ok(Mappers.Customer(customer));
+            .FirstOrDefaultAsync(c => c.Email.ToLower() == input.Email.ToLower());
+            
+        if (customer is null) return Unauthorized("Invalid credentials");
+
+        bool isValid = CryptoHelper.VerifyPassword(input.Password, customer.Password);
+        if (!isValid) return Unauthorized("Invalid credentials");
+
+        // Upgrade legacy plaintext password to PBKDF2 hash upon successful login
+        if (!customer.Password.Contains(':'))
+        {
+            customer.Password = CryptoHelper.HashPassword(input.Password);
+            await _db.SaveChangesAsync();
+        }
+
+        return Ok(Mappers.Customer(customer));
     }
 
     [HttpGet("{id}")]
@@ -142,9 +156,11 @@ public class CustomersController : ControllerBase
     {
         var customer = await Load(id);
         if (customer is null) return NotFound();
-        if (customer.Password != input.OldPassword)
-            return BadRequest("The given current password does not match");
-        customer.Password = input.NewPassword;
+        
+        bool isValid = CryptoHelper.VerifyPassword(input.OldPassword, customer.Password);
+        if (!isValid) return BadRequest("The given current password does not match");
+        
+        customer.Password = CryptoHelper.HashPassword(input.NewPassword);
         return await SaveAndReturn(customer);
     }
 

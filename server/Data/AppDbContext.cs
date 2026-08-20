@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Server.Models;
+using Server.Security;
 
 namespace Server.Data;
 
@@ -49,5 +51,17 @@ public class AppDbContext : DbContext
             .OnDelete(DeleteBehavior.Restrict);
 
         b.Entity<Customer>().HasIndex(c => c.Email).IsUnique();
+
+        // AES-256 encryption at rest for customer PII. Email остаётся открытым —
+        // по нему идёт поиск/логин (WHERE Email = ...), а зашифрованное поле для этого не годится.
+        // DecryptData сам откатывается на исходную строку, если она ещё не зашифрована,
+        // поэтому старые незашифрованные записи в базе продолжают читаться корректно.
+        var piiConverter = new ValueConverter<string?, string?>(
+            v => v == null ? v : CryptoHelper.EncryptData(v),
+            v => v == null ? v : CryptoHelper.DecryptData(v));
+
+        b.Entity<Customer>().Property(c => c.FirstName).HasConversion(piiConverter);
+        b.Entity<Customer>().Property(c => c.LastName).HasConversion(piiConverter);
+        b.Entity<Customer>().Property(c => c.DateOfBirth).HasConversion(piiConverter);
     }
 }

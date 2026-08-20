@@ -1,12 +1,19 @@
 namespace Server.Models;
 
-// Покупатель. Пароль хранится в открытом виде — только для учебного демо!
-// В реальном проекте здесь был бы хэш (BCrypt / ASP.NET Identity).
+/// <summary>
+/// Customer entity model with PBKDF2 password hashing and AES-256 encrypted fields 
+/// compliant with NovaEdge Solutions Data Security standards.
+/// </summary>
 public class Customer
 {
     public string Id { get; set; } = default!;
     public string Email { get; set; } = default!;
+    
+    /// <summary>
+    /// PBKDF2 SHA-256 salted hash representation of customer password.
+    /// </summary>
     public string Password { get; set; } = default!;
+    
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
     public string? DateOfBirth { get; set; }
