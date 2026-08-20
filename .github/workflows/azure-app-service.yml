@@ -7,6 +7,8 @@ on:
 
 env:
   AZURE_WEBAPP_NAME: OrganicStore
+  # TODO: замените на реальное имя resource group в Azure (Portal -> App Service -> Overview -> Resource group)
+  AZURE_RESOURCE_GROUP: organicRG
 
 jobs:
   build-and-deploy:
@@ -45,3 +47,21 @@ jobs:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: publish
+
+      - name: Log in to Azure CLI
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # Прописывает провайдер БД, строку подключения и ключ шифрования как application settings
+      # App Service при каждом деплое — не нужно настраивать это руками в портале Azure
+      # после пересоздания ресурса.
+      - name: Configure App Service settings
+        run: |
+          az webapp config appsettings set \
+            --name "${{ env.AZURE_WEBAPP_NAME }}" \
+            --resource-group "${{ env.AZURE_RESOURCE_GROUP }}" \
+            --settings \
+              DatabaseProvider=SqlServer \
+              ConnectionStrings__DefaultConnection="${{ secrets.AZURE_SQLSERVER_CONNECTION_STRING }}" \
+              DATA_PROTECTION_KEY="${{ secrets.DATA_PROTECTION_KEY }}"
